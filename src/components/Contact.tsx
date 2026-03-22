@@ -78,11 +78,31 @@ export default function Contact() {
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (validate()) {
       setIsSubmitted(true);
-      // Premium distinction: Reset form and show success
+      
+      // Real submission using Formspree
+      try {
+        await fetch("https://formspree.io/f/mwpkeovb", {
+          method: "POST",
+          body: JSON.stringify({
+            name: formData.name,
+            email: formData.email,
+            message: formData.message,
+            _subject: `Nuevo mensaje de portafolio LDE - ${formData.name}`,
+          }),
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          }
+        });
+      } catch (error) {
+        console.error("Error sending email:", error);
+      }
+
+      // Reset form and show success
       setTimeout(() => {
         setFormData({ name: '', email: '', message: '' });
         setIsSubmitted(false);

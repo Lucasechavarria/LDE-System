@@ -165,15 +165,18 @@ export default function HarmonicStrings() {
               // Centered internally (qX=20) and shifted externally (hShift) to follow visual
               const visualCenter = (startX + (20 + endOffset)) / 2;
               const hShift = isMobile ? 0 : (visualCenter - 20);
-              const correctedStartX = startX - hShift;
-              const correctedEndOffset = endOffset - hShift;
-              const qX = isMobile ? 20 : (correctedStartX + (20 + correctedEndOffset)) / 2;
+              const cSX = startX - hShift;
+              const yB = yBottom || 0;
+              const qx = isMobile ? 20 : (cSX + (20 + (endOffset - hShift))) / 2;
+              const qy = qY || 0;
+              const cEO = 20 + (endOffset - hShift);
+              const yT = yTop || 0;
 
               return (
                 <div
                   key={index}
                   className="relative h-[calc(100%-20px)] w-8 sm:w-10 mt-[20px] pointer-events-auto cursor-crosshair group/string"
-                  style={{ transform: `rotate(${rotations[index]}deg) translateX(${hShift}px)` }}
+                  style={{ transform: `rotate(${rotations[index] || 0}deg) translateX(${hShift}px)` }}
                   onMouseEnter={() => {
                     setActiveString(index);
                     playCelloTone(index);
@@ -184,7 +187,7 @@ export default function HarmonicStrings() {
 
                   {/* NEON BLOOM SVG LIGHT EFFECT */}
                   <svg
-                    viewBox={`0 0 40 ${yBottom}`}
+                    viewBox={`0 0 40 ${yB}`}
                     className="absolute inset-0 w-full h-full overflow-visible pointer-events-none z-20"
                     preserveAspectRatio="none"
                   >
@@ -203,7 +206,7 @@ export default function HarmonicStrings() {
                     {/* Outer Ambient Glow (Secondary) */}
                     {activeString === index && (
                       <motion.path
-                        d={`M ${correctedStartX} ${yBottom} Q ${qX} ${qY} ${20 + correctedEndOffset} ${yTop}`}
+                        d={`M ${cSX} ${yB} Q ${qx} ${qy} ${cEO} ${yT}`}
                         fill="none"
                         stroke="rgba(0, 240, 255, 0.4)"
                         strokeWidth="22"
@@ -216,20 +219,20 @@ export default function HarmonicStrings() {
 
                     {/* Main String Path */}
                     <motion.path
-                      d={`M ${correctedStartX} ${yBottom} Q ${qX} ${qY} ${20 + correctedEndOffset} ${yTop}`}
+                      d={`M ${cSX} ${yB} Q ${qx} ${qy} ${cEO} ${yT}`}
                       fill="none"
                       stroke={activeString === index ? "rgba(255,255,255,0.5)" : "rgba(255,255,255,0.1)"}
                       strokeWidth={activeString === index ? 7.0 : 2.0}
                       animate={activeString === index ? {
                         d: [
-                          `M ${correctedStartX} ${yBottom} Q ${qX} ${qY} ${20 + correctedEndOffset} ${yTop}`,
-                          `M ${correctedStartX} ${yBottom} Q ${qX - 25} ${qY} ${20 + correctedEndOffset} ${yTop}`,
-                          `M ${correctedStartX} ${yBottom} Q ${qX + 25} ${qY} ${20 + correctedEndOffset} ${yTop}`,
-                          `M ${correctedStartX} ${yBottom} Q ${qX} ${qY} ${20 + correctedEndOffset} ${yTop}`,
+                          `M ${cSX} ${yB} Q ${qx} ${qy} ${cEO} ${yT}`,
+                          `M ${cSX} ${yB} Q ${qx - 25} ${qy} ${cEO} ${yT}`,
+                          `M ${cSX} ${yB} Q ${qx + 25} ${qy} ${cEO} ${yT}`,
+                          `M ${cSX} ${yB} Q ${qx} ${qy} ${cEO} ${yT}`,
                         ],
                         stroke: ["rgba(255,255,255,0.5)", "rgba(0, 240, 255, 0.35)", "rgba(255,255,255,0.5)"]
                       } : {
-                        d: `M ${correctedStartX} ${yBottom} Q ${qX} ${qY} ${20 + correctedEndOffset} ${yTop}`,
+                        d: `M ${cSX} ${yB} Q ${qx} ${qy} ${cEO} ${yT}`,
                         stroke: "rgba(255,255,255,0.1)"
                       }}
                       transition={{
