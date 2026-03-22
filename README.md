@@ -1,50 +1,74 @@
-# React + TypeScript + Vite
+# 🎻 LDE System | Portafolio Interactivo de Lucas Echavarría
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+¡Bienvenido a **LDE System**! Este no es solo un portafolio, es una experiencia inmersiva diseñada para fusionar la elegancia de la música clásica con la estética técnica del futuro. Construido con las tecnologías más modernas de desarrollo web, cada píxel está diseñado para impresionar.
 
-Currently, two official plugins are available:
+---
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## ✨ Características Principales
 
-## Expanding the ESLint configuration
+### 🔬 Precise Resonance (Las Cuerdas del Cello)
+Una de las piezas centrales de este portafolio es la sección interactiva del cello. 
+- **Física de Vibración Real**: Cuerdas que reaccionan al movimiento del cursor con animaciones de vibración elástica calculada por SVG.
+- **Aura de Neón Adaptativa**: Efectos de "bloom" y resplandor dinámico que pulsan al interactuar.
+- **Audio Generativo**: Cada cuerda emite un tono de cello real procesado por Web Audio API para una inmersión total.
+- **Calibración Milimétrica**: Ajustes de posición horizontal y vertical optimizados tanto para pantallas 4K como para dispositivos móviles.
 
-If you are developing a production application, we recommend updating the configuration to enable type aware lint rules:
+### 🚀 Project Showcase (Carrusel Cyber)
+Presentación de proyectos mediante un carrusel dinámico con una estética de "alta tecnología":
+- **Tarjetas Cyberpunk**: Bordes de cristal (glassmorphism), brillos líquidos y animaciones de entrada fluidas.
+- **Enlace Directo**: Acceso inmediato a despliegues en vivo y repositorios de GitHub.
+- **Responsivo**: Adaptación perfecta para una navegación fluida en cualquier dispositivo.
 
-- Configure the top-level `parserOptions` property like this:
+### ⌨️ Estética de Código y Matrix
+- **Matrix Text Animation**: Títulos que se decodifican en tiempo real al entrar en vista.
+- **Liquid Glow Buttons**: Botones que parecen contener energía líquida al pasar el mouse.
+- **Diseño Ultra-Minimalista**: Una paleta de colores oscuros profundos con acentos en "Cyber Cyan" (#00F0FF).
 
-```js
-export default tseslint.config({
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
-```
+---
 
-- Replace `tseslint.configs.recommended` to `tseslint.configs.recommendedTypeChecked` or `tseslint.configs.strictTypeChecked`
-- Optionally add `...tseslint.configs.stylisticTypeChecked`
-- Install [eslint-plugin-react](https://github.com/jsx-eslint/eslint-plugin-react) and update the config:
+## 🛠️ Stack Tecnológico
 
-```js
-// eslint.config.js
-import react from 'eslint-plugin-react'
+LDE System utiliza herramientas de vanguardia para garantizar rendimiento y fidelidad visual:
 
-export default tseslint.config({
-  // Set the react version
-  settings: { react: { version: '18.3' } },
-  plugins: {
-    // Add the react plugin
-    react,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended rules
-    ...react.configs.recommended.rules,
-    ...react.configs['jsx-runtime'].rules,
-  },
-})
-```
+- **Framework**: [React 19](https://reactjs.org/) + [Vite](https://vitejs.dev/)
+- **Lenguaje**: [TypeScript](https://www.typescriptlang.org/)
+- **Animaciones**: [Framer Motion](https://www.framer.com/motion/)
+- **Estilos**: [Tailwind CSS](https://tailwindcss.com/)
+- **Componentes UI**: [Radix UI](https://www.radix-ui.com/)
+- **Iconos**: [Lucide React](https://lucide.dev/)
+
+---
+
+## 🚀 Instalación y Uso
+
+Para ejecutar este proyecto localmente:
+
+1. **Clonar el repositorio**:
+   ```bash
+   git clone https://github.com/Lucasechavarria/LDE-System.git
+   ```
+
+2. **Acceder al directorio**:
+   ```bash
+   cd lde-portfolio
+   ```
+
+3. **Instalar dependencias**: (Recomendado usar `pnpm`)
+   ```bash
+   pnpm install
+   ```
+
+4. **Iniciar el servidor de desarrollo**:
+   ```bash
+   npm run dev
+   ```
+
+---
+
+## 🎨 Filosofía de Diseño: "High-End Resonance"
+
+El diseño se basa en el concepto de la **resonancia**. Al igual que un instrumento musical, la interfaz reacciona e interactúa con el usuario, creando un diálogo visual. El contraste entre la madera orgánica del cello y los elementos de interfaz neón representa la dualidad del desarrollador: **Artesanía y Tecnología**.
+
+---
+
+Desarrollado con ❤️ por [Lucas Echavarría](https://github.com/Lucasechavarria).
