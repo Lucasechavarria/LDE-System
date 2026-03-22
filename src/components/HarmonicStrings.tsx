@@ -2,10 +2,10 @@ import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const celloWorks = [
-  { name: "Elgar - Cello Concerto", note: "C", color: "#00F0FF" },
-  { name: "Bach - Cello Suite No. 1", note: "G", color: "#00F0FF" },
-  { name: "Dvořák - Cello Concerto", note: "D", color: "#00F0FF" },
-  { name: "Saint-Saëns - The Swan", note: "A", color: "#00F0FF" },
+  { name: "Elgar - Cello Concerto", note: "C", color: "#00F0FF", link: "https://music.youtube.com/watch?v=O3C4Dpx2C2w" },
+  { name: "Bach - Cello Suite No. 1", note: "G", color: "#00F0FF", link: "https://music.youtube.com/watch?v=1prweT95Mo0" },
+  { name: "Dvořák - Cello Concerto", note: "D", color: "#00F0FF", link: "https://music.youtube.com/watch?v=Vz8_vT9vExo" },
+  { name: "Saint-Saëns - The Swan", note: "A", color: "#00F0FF", link: "https://music.youtube.com/watch?v=3qrKjywjo7Q" },
 ];
 
 export default function HarmonicStrings() {
@@ -277,14 +277,27 @@ export default function HarmonicStrings() {
                         initial={{ opacity: 0, y: isMobile ? 50 : -50, scale: 0.8, x: isMobile ? "-50%" : -50 }}
                         animate={{ opacity: 1, y: isMobile ? 150 : -50, scale: 1, x: isMobile ? "-50%" : -280 }}
                         exit={{ opacity: 0, scale: 0.8 }}
-                        className={`absolute top-1/2 z-50 pointer-events-none ${isMobile ? 'left-1/2' : 'left-0'}`}
+                        className={`absolute top-1/2 z-50 pointer-events-auto ${isMobile ? 'left-1/2' : 'left-0'}`}
                       >
                         <div className="bg-[#050505]/98 backdrop-blur-3xl border border-[#00F0FF]/30 p-2 sm:p-5 min-w-[180px] sm:min-w-[260px] rounded-lg shadow-[0_40px_100px_rgba(0,0,0,1)] border-l-4 border-l-[#00F0FF]">
                           <h4 className="text-xs sm:text-xl text-white font-serif italic mb-1 tracking-tighter leading-tight">{work.name}</h4>
-                          <div className="flex items-center gap-2 sm:gap-3">
+                          <div className="flex items-center gap-2 sm:gap-3 mb-4">
                             <div className="h-[1px] flex-1 bg-gradient-to-r from-[#00F0FF] to-transparent" />
                             <p className="text-[#00F0FF] text-[7px] sm:text-[9px] uppercase font-black tracking-widest">RESONANCE</p>
                           </div>
+                          
+                          <a 
+                            href={work.link}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="w-full flex items-center justify-center gap-2 py-2 sm:py-3 px-4 bg-[#00F0FF]/10 hover:bg-[#00F0FF]/25 border border-[#00F0FF]/40 rounded-sm text-[8px] sm:text-[10px] font-black text-white hover:text-[#00F0FF] transition-all duration-300 tracking-[0.2em] uppercase"
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            <svg className="w-3 h-3 sm:w-4 sm:h-4" fill="currentColor" viewBox="0 0 24 24">
+                              <path d="M10 16.5l6-4.5-6-4.5v9zM12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z" />
+                            </svg>
+                            Escuchar Versión Completa
+                          </a>
                         </div>
                       </motion.div>
                     )}
