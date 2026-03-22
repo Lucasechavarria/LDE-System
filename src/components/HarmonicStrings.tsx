@@ -2,24 +2,73 @@ import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const celloWorks = [
-  { name: "Elgar - Cello Concerto", note: "C", color: "#00F0FF" },
-  { name: "Bach - Cello Suite No. 1", note: "G", color: "#00F0FF" },
-  { name: "Dvořák - Cello Concerto", note: "D", color: "#00F0FF" },
-  { name: "Saint-Saëns - The Swan", note: "A", color: "#00F0FF" },
+  { 
+    name: "Elgar - Cello Concerto", 
+    note: "C", 
+    color: "#00F0FF", 
+    link: "https://music.youtube.com/watch?v=O3C4Dpx2C2w",
+    file: "/assets/audio/Jacqueline du Pre & Daniel Barenboim -  Elgar Cello Concerto.mp3"
+  },
+  { 
+    name: "Bach - Cello Suite No. 1", 
+    note: "G", 
+    color: "#00F0FF", 
+    link: "https://music.youtube.com/watch?v=1prweT95Mo0",
+    file: "/assets/audio/Mischa Maisky plays Bach Cello Suite No.1 in G (full).mp3"
+  },
+  { 
+    name: "Dvořák - Cello Concerto", 
+    note: "D", 
+    color: "#00F0FF", 
+    link: "https://music.youtube.com/watch?v=Vz8_vT9vExo",
+    file: "/assets/audio/Jacqueline du Pré - Dvořák Cello Concerto – London Symphony Orchestra cond. Daniel Barenboim.mp3"
+  },
+  { 
+    name: "Saint-Saëns - The Swan", 
+    note: "A", 
+    color: "#00F0FF", 
+    link: "https://music.youtube.com/watch?v=3qrKjywjo7Q",
+    file: "/assets/audio/HAUSER - The Swan.mp3"
+  },
 ];
 
 export default function HarmonicStrings() {
   const [activeString, setActiveString] = useState<number | null>(null);
   const [isHovered, setIsHovered] = useState(false);
+  const [volume, setVolume] = useState(0.4);
   const audioContextRef = useRef<AudioContext | null>(null);
+  const audioRefs = useRef<(HTMLAudioElement | null)[]>([]);
 
   useEffect(() => {
+    // Pre-load audio elements
+    audioRefs.current = celloWorks.map(work => {
+      const audio = new Audio(work.file);
+      audio.loop = true;
+      audio.volume = 0; // Starts silent
+      return audio;
+    });
+
     return () => {
+      audioRefs.current.forEach(audio => {
+        if (audio) {
+          audio.pause();
+          audio.src = "";
+        }
+      });
       if (audioContextRef.current) {
         audioContextRef.current.close();
       }
     };
   }, []);
+
+  // Update volume of all active sounds when slider changes
+  useEffect(() => {
+    audioRefs.current.forEach((audio, idx) => {
+      if (audio && idx === activeString) {
+        audio.volume = volume;
+      }
+    });
+  }, [volume, activeString]);
 
   const initAudio = () => {
     if (!audioContextRef.current) {
@@ -30,37 +79,52 @@ export default function HarmonicStrings() {
     }
   };
 
-  const playCelloTone = (index: number) => {
-    initAudio();
-    const ctx = audioContextRef.current!;
-    const baseFreqs = [65.41, 98.00, 146.83, 220.00];
-    const freq = baseFreqs[index];
+  const playCelloWork = (index: number) => {
+    // Classical Themes via MP3
+    const selectedAudio = audioRefs.current[index];
+    if (selectedAudio) {
+      selectedAudio.currentTime = index === 3 ? 30 : 0; // Start Swan at 30s as requested before
+      selectedAudio.play().catch(() => console.log("User interaction required for audio"));
+      
+      // Smooth fade-in
+      let v = 0;
+      const interval = setInterval(() => {
+        v += 0.05;
+        if (v >= volume) {
+          selectedAudio.volume = volume;
+          clearInterval(interval);
+        } else {
+          selectedAudio.volume = v;
+        }
+      }, 50);
+    }
+  };
 
-    const gainNode = ctx.createGain();
-    gainNode.connect(ctx.destination);
-    gainNode.gain.setValueAtTime(0, ctx.currentTime);
-    gainNode.gain.linearRampToValueAtTime(0.3, ctx.currentTime + 0.1);
-    gainNode.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 3);
+  const stopCelloWork = (index: number) => {
+    const selectedAudio = audioRefs.current[index];
+    if (selectedAudio) {
+      let v = selectedAudio.volume;
+      const interval = setInterval(() => {
+        v -= 0.05;
+        if (v <= 0) {
+          selectedAudio.volume = 0;
+          selectedAudio.pause();
+          clearInterval(interval);
+        } else {
+          selectedAudio.volume = v;
+        }
+      }, 50);
+    }
+  };
 
-    [1, 2, 3, 4, 5, 8].forEach((h, i) => {
-      const osc = ctx.createOscillator();
-      osc.type = i === 0 ? 'sawtooth' : 'sine';
-      osc.frequency.setValueAtTime(freq * h, ctx.currentTime);
-      const weight = [0.4, 0.2, 0.15, 0.1, 0.05, 0.02][i];
-      const hGain = ctx.createGain();
-      hGain.gain.setValueAtTime(weight, ctx.currentTime);
-      osc.connect(hGain);
-      hGain.connect(gainNode);
-      osc.start(ctx.currentTime);
-      osc.stop(ctx.currentTime + 3);
-    });
+  const handleMouseEnter = (index: number) => {
+    setActiveString(index);
+    playCelloWork(index);
+  };
 
-    const filter = ctx.createBiquadFilter();
-    filter.type = 'lowpass';
-    filter.frequency.setValueAtTime(1200, ctx.currentTime);
-    filter.Q.setValueAtTime(1.5, ctx.currentTime);
-    gainNode.connect(filter);
-    filter.connect(ctx.destination);
+  const handleMouseLeave = (index: number) => {
+    stopCelloWork(index);
+    setActiveString(null);
   };
 
   const [isMobile, setIsMobile] = useState(false);
@@ -165,26 +229,26 @@ export default function HarmonicStrings() {
               // Centered internally (qX=20) and shifted externally (hShift) to follow visual
               const visualCenter = (startX + (20 + endOffset)) / 2;
               const hShift = isMobile ? 0 : (visualCenter - 20);
-              const correctedStartX = startX - hShift;
-              const correctedEndOffset = endOffset - hShift;
-              const qX = isMobile ? 20 : (correctedStartX + (20 + correctedEndOffset)) / 2;
+              const cSX = startX - hShift;
+              const yB = yBottom || 0;
+              const qx = isMobile ? 20 : (cSX + (20 + (endOffset - hShift))) / 2;
+              const qy = qY || 0;
+              const cEO = 20 + (endOffset - hShift);
+              const yT = yTop || 0;
 
               return (
                 <div
                   key={index}
                   className="relative h-[calc(100%-20px)] w-8 sm:w-10 mt-[20px] pointer-events-auto cursor-crosshair group/string"
-                  style={{ transform: `rotate(${rotations[index]}deg) translateX(${hShift}px)` }}
-                  onMouseEnter={() => {
-                    setActiveString(index);
-                    playCelloTone(index);
-                  }}
-                  onMouseLeave={() => setActiveString(null)}
+                  style={{ transform: `rotate(${rotations[index] || 0}deg) translateX(${hShift}px)` }}
+                  onMouseEnter={() => handleMouseEnter(index)}
+                  onMouseLeave={() => handleMouseLeave(index)}
                 >
                   <div className="absolute inset-x-0 top-0 bottom-0 z-10" />
 
                   {/* NEON BLOOM SVG LIGHT EFFECT */}
                   <svg
-                    viewBox={`0 0 40 ${yBottom}`}
+                    viewBox={`0 0 40 ${yB}`}
                     className="absolute inset-0 w-full h-full overflow-visible pointer-events-none z-20"
                     preserveAspectRatio="none"
                   >
@@ -203,7 +267,7 @@ export default function HarmonicStrings() {
                     {/* Outer Ambient Glow (Secondary) */}
                     {activeString === index && (
                       <motion.path
-                        d={`M ${correctedStartX} ${yBottom} Q ${qX} ${qY} ${20 + correctedEndOffset} ${yTop}`}
+                        d={`M ${cSX} ${yB} Q ${qx} ${qy} ${cEO} ${yT}`}
                         fill="none"
                         stroke="rgba(0, 240, 255, 0.4)"
                         strokeWidth="22"
@@ -216,20 +280,20 @@ export default function HarmonicStrings() {
 
                     {/* Main String Path */}
                     <motion.path
-                      d={`M ${correctedStartX} ${yBottom} Q ${qX} ${qY} ${20 + correctedEndOffset} ${yTop}`}
+                      d={`M ${cSX} ${yB} Q ${qx} ${qy} ${cEO} ${yT}`}
                       fill="none"
                       stroke={activeString === index ? "rgba(255,255,255,0.5)" : "rgba(255,255,255,0.1)"}
                       strokeWidth={activeString === index ? 7.0 : 2.0}
                       animate={activeString === index ? {
                         d: [
-                          `M ${correctedStartX} ${yBottom} Q ${qX} ${qY} ${20 + correctedEndOffset} ${yTop}`,
-                          `M ${correctedStartX} ${yBottom} Q ${qX - 25} ${qY} ${20 + correctedEndOffset} ${yTop}`,
-                          `M ${correctedStartX} ${yBottom} Q ${qX + 25} ${qY} ${20 + correctedEndOffset} ${yTop}`,
-                          `M ${correctedStartX} ${yBottom} Q ${qX} ${qY} ${20 + correctedEndOffset} ${yTop}`,
+                          `M ${cSX} ${yB} Q ${qx} ${qy} ${cEO} ${yT}`,
+                          `M ${cSX} ${yB} Q ${qx - 25} ${qy} ${cEO} ${yT}`,
+                          `M ${cSX} ${yB} Q ${qx + 25} ${qy} ${cEO} ${yT}`,
+                          `M ${cSX} ${yB} Q ${qx} ${qy} ${cEO} ${yT}`,
                         ],
                         stroke: ["rgba(255,255,255,0.5)", "rgba(0, 240, 255, 0.35)", "rgba(255,255,255,0.5)"]
                       } : {
-                        d: `M ${correctedStartX} ${yBottom} Q ${qX} ${qY} ${20 + correctedEndOffset} ${yTop}`,
+                        d: `M ${cSX} ${yB} Q ${qx} ${qy} ${cEO} ${yT}`,
                         stroke: "rgba(255,255,255,0.1)"
                       }}
                       transition={{
@@ -250,14 +314,27 @@ export default function HarmonicStrings() {
                         initial={{ opacity: 0, y: isMobile ? 50 : -50, scale: 0.8, x: isMobile ? "-50%" : -50 }}
                         animate={{ opacity: 1, y: isMobile ? 150 : -50, scale: 1, x: isMobile ? "-50%" : -280 }}
                         exit={{ opacity: 0, scale: 0.8 }}
-                        className={`absolute top-1/2 z-50 pointer-events-none ${isMobile ? 'left-1/2' : 'left-0'}`}
+                        className={`absolute top-1/2 z-50 pointer-events-auto ${isMobile ? 'left-1/2' : 'left-0'}`}
                       >
                         <div className="bg-[#050505]/98 backdrop-blur-3xl border border-[#00F0FF]/30 p-2 sm:p-5 min-w-[180px] sm:min-w-[260px] rounded-lg shadow-[0_40px_100px_rgba(0,0,0,1)] border-l-4 border-l-[#00F0FF]">
                           <h4 className="text-xs sm:text-xl text-white font-serif italic mb-1 tracking-tighter leading-tight">{work.name}</h4>
-                          <div className="flex items-center gap-2 sm:gap-3">
+                          <div className="flex items-center gap-2 sm:gap-3 mb-4">
                             <div className="h-[1px] flex-1 bg-gradient-to-r from-[#00F0FF] to-transparent" />
                             <p className="text-[#00F0FF] text-[7px] sm:text-[9px] uppercase font-black tracking-widest">RESONANCE</p>
                           </div>
+                          
+                          <a 
+                            href={work.link}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="w-full flex items-center justify-center gap-2 py-2 sm:py-3 px-4 bg-[#00F0FF]/10 hover:bg-[#00F0FF]/25 border border-[#00F0FF]/40 rounded-sm text-[8px] sm:text-[10px] font-black text-white hover:text-[#00F0FF] transition-all duration-300 tracking-[0.2em] uppercase"
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            <svg className="w-3 h-3 sm:w-4 sm:h-4" fill="currentColor" viewBox="0 0 24 24">
+                              <path d="M10 16.5l6-4.5-6-4.5v9zM12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z" />
+                            </svg>
+                            Escuchar Versión Completa
+                          </a>
                         </div>
                       </motion.div>
                     )}
@@ -275,6 +352,23 @@ export default function HarmonicStrings() {
           <div className="w-8 sm:w-12 h-[1px] bg-[#00F0FF]/30 animate-pulse" />
         </div>
       )}
+
+      {/* Volume Side Bar */}
+      <div className="absolute right-[-45px] sm:right-[-70px] top-1/2 -translate-y-1/2 flex flex-col items-center gap-4 z-50 group/vol">
+        <div className="text-[7px] sm:text-[9px] text-[#00F0FF] uppercase font-black [writing-mode:vertical-lr] rotate-180 opacity-40 group-hover/vol:opacity-100 transition-opacity tracking-[0.4em]">VOLUME</div>
+        <div className="relative h-32 sm:h-48 w-1 sm:w-1.5 bg-white/5 rounded-full border border-white/10 overflow-hidden shadow-[0_0_10px_rgba(0,0,0,0.5)]">
+          <motion.div 
+            className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-[#00F0FF] to-[#00F0FF]/60"
+            animate={{ height: `${volume * 100}%` }}
+          />
+          <input 
+            type="range" min="0" max="1" step="0.01" 
+            value={volume}
+            onChange={(e) => setVolume(parseFloat(e.target.value))}
+            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer appearance-none -rotate-180"
+          />
+        </div>
+      </div>
     </div>
   );
 }

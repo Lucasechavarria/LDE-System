@@ -11,7 +11,7 @@ export default function Footer() {
           className="flex flex-col items-center justify-center gap-4"
         >
           <div className="text-[#9CA3AF] text-sm">
-            © {new Date().getFullYear()} <span className="text-[#00F0FF]">LDE.dev</span>. Todos los derechos reservados.
+            © {new Date().getFullYear()} <span className="text-[#00F0FF]">LDE-System</span>. Todos los derechos reservados.
           </div>
 
         </motion.div>

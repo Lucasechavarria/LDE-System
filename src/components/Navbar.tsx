@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { Logo } from './ui/Logo';
 
 const navItems = [
   { id: 'hero', label: 'Inicio' },
@@ -56,10 +57,11 @@ export default function Navbar() {
           <motion.a
             href="#"
             onClick={(e) => { e.preventDefault(); handleNavClick('hero'); }}
-            className="text-2xl font-bold text-[#E5E7EB]"
+            className="flex items-center gap-2 text-2xl font-bold text-[#E5E7EB]"
             whileHover={{ scale: 1.05 }}
           >
-            <span className="text-[#00F0FF]">LDE</span>.dev
+            <Logo size={32} glow={false} />
+            <span className="text-[#00F0FF]">LDE</span>-System
           </motion.a>
 
           {/* Desktop Navigation */}

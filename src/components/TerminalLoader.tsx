@@ -9,7 +9,7 @@ interface TerminalLoaderProps {
 const terminalLines = [
   { text: '> System Check... OK', delay: 0 },
   { text: '> Loading Architecture... OK', delay: 800 },
-  { text: '> Initializing LDE.dev Kernel...', delay: 1600 },
+  { text: '> Initializing LDE-System Kernel...', delay: 1600 },
   { text: '> Mounting Components...', delay: 2400 },
   { text: '> Access Granted', delay: 3200 },
 ];
@@ -62,7 +62,7 @@ export default function TerminalLoader({ onComplete }: TerminalLoaderProps) {
                 <div className="w-3 h-3 rounded-full bg-red-500/80" />
                 <div className="w-3 h-3 rounded-full bg-yellow-500/80" />
                 <div className="w-3 h-3 rounded-full bg-green-500/80" />
-                <span className="ml-4 text-[10px] uppercase tracking-widest text-[#00F0FF]/60">LDE.dev Terminal</span>
+                <span className="ml-4 text-[10px] uppercase tracking-widest text-[#00F0FF]/60">LDE-System Terminal</span>
               </motion.div>
 
               <div className="space-y-3">
