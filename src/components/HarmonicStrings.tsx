@@ -2,24 +2,73 @@ import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const celloWorks = [
-  { name: "Elgar - Cello Concerto", note: "C", color: "#00F0FF", link: "https://music.youtube.com/watch?v=O3C4Dpx2C2w" },
-  { name: "Bach - Cello Suite No. 1", note: "G", color: "#00F0FF", link: "https://music.youtube.com/watch?v=1prweT95Mo0" },
-  { name: "Dvořák - Cello Concerto", note: "D", color: "#00F0FF", link: "https://music.youtube.com/watch?v=Vz8_vT9vExo" },
-  { name: "Saint-Saëns - The Swan", note: "A", color: "#00F0FF", link: "https://music.youtube.com/watch?v=3qrKjywjo7Q" },
+  { 
+    name: "Elgar - Cello Concerto", 
+    note: "C", 
+    color: "#00F0FF", 
+    link: "https://music.youtube.com/watch?v=O3C4Dpx2C2w",
+    file: "/assets/audio/Jacqueline du Pre & Daniel Barenboim -  Elgar Cello Concerto.mp3"
+  },
+  { 
+    name: "Bach - Cello Suite No. 1", 
+    note: "G", 
+    color: "#00F0FF", 
+    link: "https://music.youtube.com/watch?v=1prweT95Mo0",
+    file: "/assets/audio/Mischa Maisky plays Bach Cello Suite No.1 in G (full).mp3"
+  },
+  { 
+    name: "Dvořák - Cello Concerto", 
+    note: "D", 
+    color: "#00F0FF", 
+    link: "https://music.youtube.com/watch?v=Vz8_vT9vExo",
+    file: "/assets/audio/Jacqueline du Pré - Dvořák Cello Concerto – London Symphony Orchestra cond. Daniel Barenboim.mp3"
+  },
+  { 
+    name: "Saint-Saëns - The Swan", 
+    note: "A", 
+    color: "#00F0FF", 
+    link: "https://music.youtube.com/watch?v=3qrKjywjo7Q",
+    file: "/assets/audio/HAUSER - The Swan.mp3"
+  },
 ];
 
 export default function HarmonicStrings() {
   const [activeString, setActiveString] = useState<number | null>(null);
   const [isHovered, setIsHovered] = useState(false);
+  const [volume, setVolume] = useState(0.4);
   const audioContextRef = useRef<AudioContext | null>(null);
+  const audioRefs = useRef<(HTMLAudioElement | null)[]>([]);
 
   useEffect(() => {
+    // Pre-load audio elements
+    audioRefs.current = celloWorks.map(work => {
+      const audio = new Audio(work.file);
+      audio.loop = true;
+      audio.volume = 0; // Starts silent
+      return audio;
+    });
+
     return () => {
+      audioRefs.current.forEach(audio => {
+        if (audio) {
+          audio.pause();
+          audio.src = "";
+        }
+      });
       if (audioContextRef.current) {
         audioContextRef.current.close();
       }
     };
   }, []);
+
+  // Update volume of all active sounds when slider changes
+  useEffect(() => {
+    audioRefs.current.forEach((audio, idx) => {
+      if (audio && idx === activeString) {
+        audio.volume = volume;
+      }
+    });
+  }, [volume, activeString]);
 
   const initAudio = () => {
     if (!audioContextRef.current) {
@@ -30,61 +79,52 @@ export default function HarmonicStrings() {
     }
   };
 
-  const playCelloTone = (index: number) => {
-    initAudio();
-    const ctx = audioContextRef.current!;
-    const now = ctx.currentTime;
-
-    // Classical Themes: Elgar, Bach, Dvořák, Saint-Saëns
-    const melodies = [
-      // 0: Elgar - Cello Concerto (C String: C-G-E-C)
-      [ { f: 65.41, d: 0.8 }, { f: 98.00, d: 0.8 }, { f: 82.41, d: 0.8 }, { f: 65.41, d: 1.2 } ],
-      // 1: Bach - Suite No. 1 (G String: G-D-B-A-B-D-G)
-      [ { f: 98.00, d: 0.25 }, { f: 146.83, d: 0.25 }, { f: 246.94, d: 0.25 }, { f: 220.00, d: 0.25 }, { f: 246.94, d: 0.25 }, { f: 146.83, d: 0.25 }, { f: 98.00, d: 0.5 } ],
-      // 2: Dvořák - Cello Concerto (D String: D-A-F#-D)
-      [ { f: 146.83, d: 0.6 }, { f: 220.00, d: 0.6 }, { f: 185.00, d: 0.6 }, { f: 146.83, d: 1.0 } ],
-      // 3: Saint-Saëns - The Swan (A String: A-B-C#-D)
-      [ { f: 220.00, d: 0.5 }, { f: 246.94, d: 0.5 }, { f: 277.18, d: 0.5 }, { f: 293.66, d: 1.0 } ]
-    ];
-
-    const sequence = melodies[index] || [];
-    let timeOffset = 0;
-
-    sequence.forEach((note) => {
-      const startTime = now + timeOffset;
-      const duration = note.d;
-      const endTime = startTime + duration;
-
-      const gainNode = ctx.createGain();
-      gainNode.gain.setValueAtTime(0, startTime);
-      gainNode.gain.linearRampToValueAtTime(0.25, startTime + 0.1);
-      gainNode.gain.exponentialRampToValueAtTime(0.001, endTime);
-
-      const filter = ctx.createBiquadFilter();
-      filter.type = 'lowpass';
-      filter.frequency.setValueAtTime(1400, startTime);
-      filter.Q.setValueAtTime(2, startTime);
-
-      const harmonics = [1, 2, 3, 4, 5];
-      harmonics.forEach((h, i) => {
-        const osc = ctx.createOscillator();
-        osc.type = i === 0 ? 'sawtooth' : 'sine';
-        osc.frequency.setValueAtTime(note.f * h, startTime);
-        
-        const hG = ctx.createGain();
-        hG.gain.value = [0.4, 0.2, 0.1, 0.05, 0.02][i];
-        
-        osc.connect(hG);
-        hG.connect(gainNode);
-        osc.start(startTime);
-        osc.stop(endTime);
-      });
-
-      gainNode.connect(filter);
-      filter.connect(ctx.destination);
+  const playCelloWork = (index: number) => {
+    // Classical Themes via MP3
+    const selectedAudio = audioRefs.current[index];
+    if (selectedAudio) {
+      selectedAudio.currentTime = index === 3 ? 30 : 0; // Start Swan at 30s as requested before
+      selectedAudio.play().catch(() => console.log("User interaction required for audio"));
       
-      timeOffset += duration * 0.95; // Smooth legato overlap
-    });
+      // Smooth fade-in
+      let v = 0;
+      const interval = setInterval(() => {
+        v += 0.05;
+        if (v >= volume) {
+          selectedAudio.volume = volume;
+          clearInterval(interval);
+        } else {
+          selectedAudio.volume = v;
+        }
+      }, 50);
+    }
+  };
+
+  const stopCelloWork = (index: number) => {
+    const selectedAudio = audioRefs.current[index];
+    if (selectedAudio) {
+      let v = selectedAudio.volume;
+      const interval = setInterval(() => {
+        v -= 0.05;
+        if (v <= 0) {
+          selectedAudio.volume = 0;
+          selectedAudio.pause();
+          clearInterval(interval);
+        } else {
+          selectedAudio.volume = v;
+        }
+      }, 50);
+    }
+  };
+
+  const handleMouseEnter = (index: number) => {
+    setActiveString(index);
+    playCelloWork(index);
+  };
+
+  const handleMouseLeave = (index: number) => {
+    stopCelloWork(index);
+    setActiveString(null);
   };
 
   const [isMobile, setIsMobile] = useState(false);
@@ -201,11 +241,8 @@ export default function HarmonicStrings() {
                   key={index}
                   className="relative h-[calc(100%-20px)] w-8 sm:w-10 mt-[20px] pointer-events-auto cursor-crosshair group/string"
                   style={{ transform: `rotate(${rotations[index] || 0}deg) translateX(${hShift}px)` }}
-                  onMouseEnter={() => {
-                    setActiveString(index);
-                    playCelloTone(index);
-                  }}
-                  onMouseLeave={() => setActiveString(null)}
+                  onMouseEnter={() => handleMouseEnter(index)}
+                  onMouseLeave={() => handleMouseLeave(index)}
                 >
                   <div className="absolute inset-x-0 top-0 bottom-0 z-10" />
 
@@ -315,6 +352,23 @@ export default function HarmonicStrings() {
           <div className="w-8 sm:w-12 h-[1px] bg-[#00F0FF]/30 animate-pulse" />
         </div>
       )}
+
+      {/* Volume Side Bar */}
+      <div className="absolute right-[-45px] sm:right-[-70px] top-1/2 -translate-y-1/2 flex flex-col items-center gap-4 z-50 group/vol">
+        <div className="text-[7px] sm:text-[9px] text-[#00F0FF] uppercase font-black [writing-mode:vertical-lr] rotate-180 opacity-40 group-hover/vol:opacity-100 transition-opacity tracking-[0.4em]">VOLUME</div>
+        <div className="relative h-32 sm:h-48 w-1 sm:w-1.5 bg-white/5 rounded-full border border-white/10 overflow-hidden shadow-[0_0_10px_rgba(0,0,0,0.5)]">
+          <motion.div 
+            className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-[#00F0FF] to-[#00F0FF]/60"
+            animate={{ height: `${volume * 100}%` }}
+          />
+          <input 
+            type="range" min="0" max="1" step="0.01" 
+            value={volume}
+            onChange={(e) => setVolume(parseFloat(e.target.value))}
+            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer appearance-none -rotate-180"
+          />
+        </div>
+      </div>
     </div>
   );
 }
