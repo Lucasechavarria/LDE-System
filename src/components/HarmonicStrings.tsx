@@ -33,34 +33,58 @@ export default function HarmonicStrings() {
   const playCelloTone = (index: number) => {
     initAudio();
     const ctx = audioContextRef.current!;
-    const baseFreqs = [65.41, 98.00, 146.83, 220.00];
-    const freq = baseFreqs[index];
+    const now = ctx.currentTime;
 
-    const gainNode = ctx.createGain();
-    gainNode.connect(ctx.destination);
-    gainNode.gain.setValueAtTime(0, ctx.currentTime);
-    gainNode.gain.linearRampToValueAtTime(0.3, ctx.currentTime + 0.1);
-    gainNode.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 3);
+    // Classical Themes: Elgar, Bach, Dvořák, Saint-Saëns
+    const melodies = [
+      // 0: Elgar - Cello Concerto (C String: C-G-E-C)
+      [ { f: 65.41, d: 0.8 }, { f: 98.00, d: 0.8 }, { f: 82.41, d: 0.8 }, { f: 65.41, d: 1.2 } ],
+      // 1: Bach - Suite No. 1 (G String: G-D-B-A-B-D-G)
+      [ { f: 98.00, d: 0.25 }, { f: 146.83, d: 0.25 }, { f: 246.94, d: 0.25 }, { f: 220.00, d: 0.25 }, { f: 246.94, d: 0.25 }, { f: 146.83, d: 0.25 }, { f: 98.00, d: 0.5 } ],
+      // 2: Dvořák - Cello Concerto (D String: D-A-F#-D)
+      [ { f: 146.83, d: 0.6 }, { f: 220.00, d: 0.6 }, { f: 185.00, d: 0.6 }, { f: 146.83, d: 1.0 } ],
+      // 3: Saint-Saëns - The Swan (A String: A-B-C#-D)
+      [ { f: 220.00, d: 0.5 }, { f: 246.94, d: 0.5 }, { f: 277.18, d: 0.5 }, { f: 293.66, d: 1.0 } ]
+    ];
 
-    [1, 2, 3, 4, 5, 8].forEach((h, i) => {
-      const osc = ctx.createOscillator();
-      osc.type = i === 0 ? 'sawtooth' : 'sine';
-      osc.frequency.setValueAtTime(freq * h, ctx.currentTime);
-      const weight = [0.4, 0.2, 0.15, 0.1, 0.05, 0.02][i];
-      const hGain = ctx.createGain();
-      hGain.gain.setValueAtTime(weight, ctx.currentTime);
-      osc.connect(hGain);
-      hGain.connect(gainNode);
-      osc.start(ctx.currentTime);
-      osc.stop(ctx.currentTime + 3);
+    const sequence = melodies[index] || [];
+    let timeOffset = 0;
+
+    sequence.forEach((note) => {
+      const startTime = now + timeOffset;
+      const duration = note.d;
+      const endTime = startTime + duration;
+
+      const gainNode = ctx.createGain();
+      gainNode.gain.setValueAtTime(0, startTime);
+      gainNode.gain.linearRampToValueAtTime(0.25, startTime + 0.1);
+      gainNode.gain.exponentialRampToValueAtTime(0.001, endTime);
+
+      const filter = ctx.createBiquadFilter();
+      filter.type = 'lowpass';
+      filter.frequency.setValueAtTime(1400, startTime);
+      filter.Q.setValueAtTime(2, startTime);
+
+      const harmonics = [1, 2, 3, 4, 5];
+      harmonics.forEach((h, i) => {
+        const osc = ctx.createOscillator();
+        osc.type = i === 0 ? 'sawtooth' : 'sine';
+        osc.frequency.setValueAtTime(note.f * h, startTime);
+        
+        const hG = ctx.createGain();
+        hG.gain.value = [0.4, 0.2, 0.1, 0.05, 0.02][i];
+        
+        osc.connect(hG);
+        hG.connect(gainNode);
+        osc.start(startTime);
+        osc.stop(endTime);
+      });
+
+      gainNode.connect(filter);
+      filter.connect(ctx.destination);
+      
+      timeOffset += duration * 0.95; // Smooth legato overlap
     });
-
-    const filter = ctx.createBiquadFilter();
-    filter.type = 'lowpass';
-    filter.frequency.setValueAtTime(1200, ctx.currentTime);
-    filter.Q.setValueAtTime(1.5, ctx.currentTime);
-    gainNode.connect(filter);
-    filter.connect(ctx.destination);
   };
 
   const [isMobile, setIsMobile] = useState(false);

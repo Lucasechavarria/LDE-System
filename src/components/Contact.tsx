@@ -78,37 +78,25 @@ export default function Contact() {
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (validate()) {
       setIsSubmitted(true);
       
-      // Real submission using Formspree
-      try {
-        await fetch("https://formspree.io/f/mwpkeovb", {
-          method: "POST",
-          body: JSON.stringify({
-            name: formData.name,
-            email: formData.email,
-            message: formData.message,
-            _subject: `Nuevo mensaje de portafolio LDE - ${formData.name}`,
-          }),
-          headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json'
-          }
-        });
-      } catch (error) {
-        console.error("Error sending email:", error);
-      }
-
-      // Reset form and show success
+      // Functional Direct Email Connection (mailto)
+      const subject = encodeURIComponent(`Nuevo mensaje de portafolio LDE-System - ${formData.name}`);
+      const body = encodeURIComponent(`Nombre: ${formData.name}\nEmail: ${formData.email}\n\nMensaje:\n${formData.message}`);
+      
+      // Delay to show the success state before opening mail client
       setTimeout(() => {
+        window.location.href = `mailto:echavarrialucas1986@gmail.com?subject=${subject}&body=${body}`;
+        
+        // Reset form
         setFormData({ name: '', email: '', message: '' });
         setIsSubmitted(false);
         setErrors([]);
         setDodgeCount(0);
-      }, 4000);
+      }, 1500);
     }
   };
 
