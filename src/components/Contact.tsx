@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { motion, useMotionValue, AnimatePresence } from 'framer-motion';
+import emailjs from '@emailjs/browser';
 import { MatrixText } from './ui/MatrixText';
 import { LiquidGlowButton } from './ui/LiquidGlowButton';
 import { SafeEmail } from './ui/SafeEmail';
@@ -13,6 +14,7 @@ export default function Contact() {
   const [errors, setErrors] = useState<string[]>([]);
   const [isValid, setIsValid] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [isSending, setIsSending] = useState(false);
   const [dodgeCount, setDodgeCount] = useState(0);
 
   const buttonRef = useRef<HTMLButtonElement>(null);
@@ -78,25 +80,41 @@ export default function Contact() {
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (validate()) {
-      setIsSubmitted(true);
+      setIsSending(true);
       
-      // Functional Direct Email Connection (mailto)
-      const subject = encodeURIComponent(`Nuevo mensaje de portafolio LDE-System - ${formData.name}`);
-      const body = encodeURIComponent(`Nombre: ${formData.name}\nEmail: ${formData.email}\n\nMensaje:\n${formData.message}`);
-      
-      // Delay to show the success state before opening mail client
-      setTimeout(() => {
-        window.location.href = `mailto:echavarrialucas1986@gmail.com?subject=${subject}&body=${body}`;
+      const templateParams = {
+        from_name: formData.name,
+        from_email: formData.email,
+        message: formData.message,
+        to_email: 'echavarrialucas1986@gmail.com',
+      };
+
+      try {
+        await emailjs.send(
+          import.meta.env.VITE_EMAILJS_SERVICE_ID || '',
+          import.meta.env.VITE_EMAILJS_TEMPLATE_ID || '',
+          templateParams,
+          import.meta.env.VITE_EMAILJS_PUBLIC_KEY || ''
+        );
         
-        // Reset form
+        setIsSubmitted(true);
         setFormData({ name: '', email: '', message: '' });
-        setIsSubmitted(false);
-        setErrors([]);
         setDodgeCount(0);
-      }, 1500);
+        
+        // Reset success state after a while
+        setTimeout(() => {
+          setIsSubmitted(false);
+          setErrors([]);
+        }, 5000);
+      } catch (error) {
+        console.error('Email error:', error);
+        setErrors(["- Error en la transmisión. Verifique su conexión y las credenciales del servicio."]);
+      } finally {
+        setIsSending(false);
+      }
     }
   };
 
@@ -199,12 +217,13 @@ export default function Contact() {
                     ref={buttonRef}
                     type="submit"
                     onMouseMove={handleMouseMove}
+                    disabled={isSending}
                     glowColor="#00F0FF"
                     fillColor="#00F0FF"
                     textColor="#050505"
                     className="px-6 py-3 sm:px-16 sm:py-5 text-base sm:text-lg md:text-xl font-black uppercase tracking-widest"
                   >
-                    ENVIAR MENSAJE
+                    {isSending ? 'ENVIANDO...' : 'ENVIAR MENSAJE'}
                   </LiquidGlowButton>
                 </motion.div>
               </div>
