@@ -109,9 +109,10 @@ export default function Contact() {
           setIsSubmitted(false);
           setErrors([]);
         }, 5000);
-      } catch (error) {
+      } catch (error: any) {
         console.error('Email error:', error);
-        setErrors(["- Error en la transmisión. Verifique su conexión y las credenciales del servicio."]);
+        const errorMessage = error?.text || error?.message || 'Verifique su conexión y las credenciales del servicio.';
+        setErrors([`- Error en la transmisión: ${errorMessage}`]);
       } finally {
         setIsSending(false);
       }
