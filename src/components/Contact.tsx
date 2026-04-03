@@ -111,8 +111,9 @@ export default function Contact() {
         }, 5000);
       } catch (error: any) {
         console.error('Email error:', error);
+        const envStatus = `[S:${!!import.meta.env.VITE_EMAILJS_SERVICE_ID} T:${!!import.meta.env.VITE_EMAILJS_TEMPLATE_ID} K:${!!import.meta.env.VITE_EMAILJS_PUBLIC_KEY}]`;
         const errorMessage = error?.text || error?.message || 'Verifique su conexión y las credenciales del servicio.';
-        setErrors([`- Error en la transmisión: ${errorMessage}`]);
+        setErrors([`- Error en la transmisión: ${errorMessage} ${envStatus}`]);
       } finally {
         setIsSending(false);
       }
